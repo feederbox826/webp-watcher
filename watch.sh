@@ -14,7 +14,7 @@ done
 
 convert() {
     input_file="$1"
-    target="${output_dir}/${input_file}"
+    target="${output_dir}/${input_file##*/}"
     # target file exists
     if [ -f "$target" ]; then
         return
@@ -24,7 +24,7 @@ convert() {
         cp "${input_file}" "${target}.svg"
     elif [ "${input_file##*.}" = "webp" ]; then
         # reencode to quality 80
-        cwebp -af -quiet -q 80 "${input_file}" -o "${target##*/}"
+        cwebp -af -quiet -q 80 "${input_file}" -o "${target}"
         echo "Converted $input_file to ${target}"
     elif [ "${input_file##*.}" = "webm" ]; then
         # ffmpeg reencode to crf 25, bv 600k
