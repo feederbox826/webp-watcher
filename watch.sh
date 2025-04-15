@@ -24,6 +24,7 @@ convert() {
     # Skip non-webp files or if the target file exists
     case "$input_file" in
         *.webp) [ ! -f "$target" ] || return ;;
+        *.svg) cp "$input_file" "$target.svg" ;;
         *) return ;;
     esac
     # reencode to quality 80
