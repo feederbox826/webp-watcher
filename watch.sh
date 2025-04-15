@@ -1,6 +1,5 @@
 #!/bin/sh
-
-echo "Starting watch.sh"
+trap 'echo "exiting"; exit 1' INT TERM EXIT
 
 input_dir=$1
 output_dir=$2
@@ -23,20 +22,28 @@ convert() {
     target=$output_dir/$base_name
     # Skip non-webp files or if the target file exists
     case "$input_file" in
-        *.webp) [ ! -f "$target" ] || return ;;
-        *.svg) cp "$input_file" "$target.svg" ;;
+        *.webp) [ ! -s "$target" ] || return ;;
+        *.svg) cp "$input_file" "$target" && return ;;
         *) return ;;
     esac
+	printf "\r[ ] %s" "$base_name"
     # reencode to quality 80
-    echo "Converting $input_file to ${target}"
-    cwebp -af -quiet -q 80 "$input_file" -o "${target}" &&
-    echo "Converted $input_file to ${target}"
+    cwebp -af -quiet -q 80 "$input_file" -o "${target}"
+    printf "\r[✓] %s\033[K\n" "$base_name"
 }
 
-# convert all files in the input directory
-for file in "$input_dir"/*.webp; do
-    [ -e "$file" ] && convert "$file"
+# process with progress bar
+echo "Starting initial processing"
+for file in "$input_dir"/*.svg; do
+    target="$output_dir/${file##*/}"
+    # Skip if the target file already exists
+    [ ! -f "$target" ] && cp "$file" "$target"
 done
+echo "Copied SVGs"
+for file in "$input_dir"/*.webp; do
+    [ -s "$file" ] && convert "$file"
+done
+echo "Initial processing complete."
 
 echo "Watching $input_dir"
 inotifywait -mrqe attrib "$input_dir" --format %w%f | while IFS= read -r file; do
