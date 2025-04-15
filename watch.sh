@@ -27,14 +27,23 @@ convert() {
         cwebp -af -quiet -q 80 "${input_file}" -o "${target}"
         echo "Converted $input_file to ${target}"
     elif [ "${input_file##*.}" = "webm" ]; then
-        # ffmpeg reencode to crf 25, bv 600k
+        # ffmpeg reencode to crf 25, bv 1M, 2 pass
         ffmpeg -i "${input_file}" \
-            -c:v libx264 \
-            -quality best \
-            -b:v 600k \
-            -crf 25 \
             -c:v libvpx-vp9 \
-            -c:a copy \
+            -deadline good \
+            -b:v 1M \
+            -crf 25 \
+			-row-mt 1 \
+			-pass 1 \
+            -an \
+			-f null /dev/null && \
+		ffmpeg -i "${input_file}" \
+            -c:v libvpx-vp9 \
+            -deadline good \
+            -b:v 1M \
+            -crf 25 \
+			-row-mt 1 \
+			-pass 2 \
             "${target}"
         echo "Converted $input_file to ${target}.webm"
     fi
