@@ -10,42 +10,38 @@ fi
 
 # ensure directories exist
 for dir in "$input_dir" "$output_dir"; do
-  if [ ! -d "$dir" ]; then
-    echo "Directory does not exist: $dir"
-    exit 1
-  fi
+  [ -d "$dir" ] || { echo "Directory does not exist: $dir"; exit 1; };
 done
 
 convert() {
   input_file="$1"
+  overwrite="$2"
   base_name=${input_file##*/}
   target=$output_dir/$base_name
-  # Skip non-webp files or if the target file exists
+  # skip if not overwriting and target exists
+  [ "$overwrite" != 1 ] && [ -s "$target" ] && return
+  # Skip non-webp files
   case "$input_file" in
-    *.webp) [ ! -s "$target" ] || return ;;
+    *.webp) ;;
     *.svg) cp "$input_file" "$target" && return ;;
     *) return ;;
   esac
-	printf "\r[ ] %s" "$base_name"
+  printf "\r[ ] %s" "$base_name"
   # reencode to quality 80
-  cwebp -af -quiet -q 80 "$input_file" -o "${target}"
+  cwebp -af -quiet -q 80 "$input_file" -o "$target"
   printf "\r[✓] %s\033[K\n" "$base_name"
 }
 
-# process with progress bar
-echo "Starting initial processing"
-for file in "$input_dir"/*.svg; do
+# initial processing
+echo "- Starting initial processing"
+for file in "$input_dir"/*.svg "$input_dir"/*.webp; do
   target="$output_dir/${file##*/}"
-  # Skip if the target file already exists
-  [ ! -f "$target" ] && cp "$file" "$target"
+  # copy only if target doesn't exit
+  [ ! -s "$target" ] && convert "$file" 0
 done
-echo "Copied SVGs"
-for file in "$input_dir"/*.webp; do
-  [ -s "$file" ] && convert "$file"
-done
-echo "Initial processing complete."
+echo "- Initial processing complete"
 
-echo "Watching $input_dir"
+echo "- Watching $input_dir"
 inotifywait -mrqe attrib "$input_dir" --format %w%f | while IFS= read -r file; do
-  convert "$file"
+  convert "$file" 1
 done
