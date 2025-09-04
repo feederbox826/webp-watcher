@@ -42,6 +42,6 @@ done
 echo "- Initial processing complete"
 
 echo "- Watching $input_dir"
-inotifywait -mrqe attrib "$input_dir" --format %w%f | while IFS= read -r file; do
+inotifywait -mqe attrib "$input_dir" --format %w%f | while IFS= read -r file; do
   convert "$file" 1
 done
