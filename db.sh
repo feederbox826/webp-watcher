@@ -31,15 +31,15 @@ lookup_file() {
   if sqlite3 -readonly "$DB_FILE" \
     "SELECT 1 FROM files WHERE filename = '$safe_filename' AND mtime = $mtime AND size = $size" \
     | grep -q 1; then
-    return 0
+    return 10
   # if target, check mtime
   elif [ "$MTIME_FALLBACK" -eq 1 ] && [ -s "$target" ]; then
     target_mtime=$(stat -c %Y "$target")
     if [ "$target_mtime" -eq "$mtime" ]; then
-      return 2
+      return 11
     fi
   fi
-  return 1
+  return 12
 }
 
 # shellcheck disable=SC3023
