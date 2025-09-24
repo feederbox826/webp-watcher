@@ -4,6 +4,9 @@ shopt -s globstar nullglob
 
 # shellcheck disable=SC1091
 source ./db.sh
+# env
+SCREENSHOT_TIME=${SCREENSHOT_TIME:-1} # time in seconds to take screenshot from videos
+QUALITY=${QUALITY:-80} # webp quality
 # lookup exit codes
 LOOKUP_MATCH=10
 LOOKUP_MTIME=11
@@ -74,7 +77,7 @@ convert() {
     *.webp)
       # reencode to quality 80
       printf "\r${CYAN}[ ] %s${NC}" "$rel_path"
-      cwebp -af -mt -quiet -q 80 "$input_file" -o "$target"
+      cwebp -af -mt -quiet -q "$QUALITY" "$input_file" -o "$target"
       printf "\r${CYAN}[i] %s\033[K${NC}\n" "$rel_path"
       insert_file "$input_file" "$target"
       return
@@ -82,7 +85,7 @@ convert() {
     *.webm)
       # thumbnail at 1s
       printf "\r${MAGENTA}[ ] %s${NC}" "$rel_path"
-      ffmpeg -i "$input_file" -vframes 1 -ss 1 "$target" -y -loglevel quiet
+      ffmpeg -i "$input_file" -vframes 1 -ss "$SCREENSHOT_TIME" "$target" -y -loglevel quiet
       printf "\r${MAGENTA}[v] %s\033[K${NC}\n" "$rel_path"
       insert_file "$input_file" "$target"
       return
