@@ -18,7 +18,7 @@ CYAN="\033[0;36m"
 GREEN="\033[0;32m"
 NC="\033[0m"
 
-trap 'echo "exiting"; exit 1' INT TERM EXIT
+trap 'echo "exiting"; exit $?' INT TERM EXIT
 
 input_dir=$1
 output_dir=$2
@@ -77,17 +77,20 @@ convert() {
     *.webp)
       # reencode to quality 80
       printf "\r${CYAN}[ ] %s${NC}" "$rel_path"
-      cwebp -af -mt -quiet -q "$QUALITY" "$input_file" -o "$target"
+      if cwebp -af -mt -quiet -q "$QUALITY" "$input_file" -o "$target"; then
+        insert_file "$input_file" "$target"
+      fi
       printf "\r${CYAN}[i] %s\033[K${NC}\n" "$rel_path"
-      insert_file "$input_file" "$target"
       return
       ;;
     *.webm)
       # thumbnail at 1s
       printf "\r${MAGENTA}[ ] %s${NC}" "$rel_path"
-      ffmpeg -ss "$SCREENSHOT_TIME" -i "$input_file" -vframes 1 "$target" -y -loglevel quiet
+      if ffmpeg -ss "$SCREENSHOT_TIME" -i "$input_file" -vframes 1 "$target" -y -loglevel quiet; then
+        nsert_file "$input_file" "$target"
+      fi
       printf "\r${MAGENTA}[v] %s\033[K${NC}\n" "$rel_path"
-      insert_file "$input_file" "$target"
+      i
       return
       ;;
     *.svg)
