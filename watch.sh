@@ -22,6 +22,7 @@ trap 'echo "exiting"; exit $?' INT TERM
 
 input_dir=$1
 output_dir=$2
+run_mode=$3
 if [ -z "$input_dir" ] || [ -z "$output_dir" ]; then
   echo "Usage: $0 <input_dir> <output_dir>"
   exit 1
@@ -109,6 +110,10 @@ for file in "$input_dir"/**/*; do
   test_convert "$file" 0
 done
 echo "- Initial processing complete"
+if [ "$run_mode" = "once" ]; then
+  echo "- Exiting (run_mode=once)"
+  exit 0
+fi
 
 echo "- Watching $input_dir"
 inotifywait -mrqe close_write,move,attrib "$input_dir" --format %w%f | while IFS= read -r file; do
