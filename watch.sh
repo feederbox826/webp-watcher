@@ -111,6 +111,6 @@ done
 echo "- Initial processing complete"
 
 echo "- Watching $input_dir"
-inotifywait -mrqe attrib "$input_dir" --format %w%f | while IFS= read -r file; do
+inotifywait -mrqe close_write,move,attrib "$input_dir" --format %w%f | while IFS= read -r file; do
   test_convert "$file" 1
 done
