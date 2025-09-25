@@ -18,7 +18,7 @@ CYAN="\033[0;36m"
 GREEN="\033[0;32m"
 NC="\033[0m"
 
-trap 'echo "exiting"; exit $?' INT TERM EXIT
+trap 'echo "exiting"; exit $?' INT TERM
 
 input_dir=$1
 output_dir=$2
@@ -87,10 +87,9 @@ convert() {
       # thumbnail at 1s
       printf "\r${MAGENTA}[ ] %s${NC}" "$rel_path"
       if ffmpeg -ss "$SCREENSHOT_TIME" -i "$input_file" -vframes 1 "$target" -y -loglevel quiet; then
-        nsert_file "$input_file" "$target"
+        insert_file "$input_file" "$target"
       fi
       printf "\r${MAGENTA}[v] %s\033[K${NC}\n" "$rel_path"
-      i
       return
       ;;
     *.svg)
