@@ -96,6 +96,9 @@ convert() {
     *.svg)
       cp "$input_file" "$target" && insert_file "$input_file" "$target"
       ;;
+    *.filepart)
+      # skip
+      ;;
     *)
       printf "\r${RED}[!] %s (unsupported)\033[K${NC}\n" "$rel_path"
       return
