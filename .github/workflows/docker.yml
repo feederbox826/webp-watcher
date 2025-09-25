@@ -27,4 +27,4 @@ jobs:
         with:
           push: true
           targets: |
-            alpinex
+            alpine
