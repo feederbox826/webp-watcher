@@ -15,11 +15,19 @@ target "alpine" {
   context = "."
   dockerfile = "Dockerfile"
   tags = [
-    "ghcr.io/${OWNER_NAME}/${IMAGE_NAME}:latest"
+    "ghcr.io/${OWNER_NAME}/${IMAGE_NAME}:latest",
+    "ghcr.io/${OWNER_NAME}/${IMAGE_NAME}:amd64"
   ]
-  platforms = ["linux/amd64", "linux/arm64"]
   cache-to = [{ type = "gha", mode = "max" }]
   cache-from = [{ type = "gha" }]
+}
+
+target "alpine-arm64" {
+  inherits = ["alpine"]
+  tags = [
+    "ghcr.io/${OWNER_NAME}/${IMAGE_NAME}:arm64"
+  ]
+  platforms = ["linux/arm64"]
 }
 
 target "alpine-debug" {
@@ -27,7 +35,5 @@ target "alpine-debug" {
   tags = [
     "${IMAGE_NAME}"
   ]
-  platforms = ["linux/amd64"]
-  cache-to = [{ type = "inline", mode = "max" }]
-  cache-from = [{ type = "inline" }]
-} 
+  cache-from = [{ type="registry", ref="ghcr.io/${OWNER_NAME}/${IMAGE_NAME}:amd64" }]
+}

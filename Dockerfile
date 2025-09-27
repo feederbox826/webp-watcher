@@ -1,5 +1,58 @@
-FROM alpine:edge
-RUN apk add --no-cache bash ffmpeg libwebp-tools inotify-tools sqlite
+FROM alpine:edge AS ffmpeg
+
+# FFmpeg build deps
+RUN apk add --no-cache \
+    build-base \
+    nasm \
+    yasm \
+    pkgconfig \
+    libwebp-dev \
+    libvpx-dev \
+    libopusenc-dev \
+    tar
+
+# Download FFmpeg source (pick stable release)
+ARG FFMPEG_VERSION=8.0
+ADD https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.gz /ffmpeg-${FFMPEG_VERSION}.tar.gz
+RUN tar xvfz /ffmpeg-${FFMPEG_VERSION}.tar.gz
+WORKDIR /ffmpeg-${FFMPEG_VERSION}
+# set CFLAGS (march via runner)
+ARG CFLAGS="-O2 -march=native -mtune=native"
+RUN ./configure \
+  --prefix=/usr/local \
+  --disable-debug \
+  --disable-doc \
+  --disable-ffprobe \
+  --disable-ffplay \
+  --disable-everything \
+  --disable-static \
+  --enable-shared \
+  # WebM support (video + audio)
+  --enable-libvpx \
+  --enable-decoder=vp9,opus \
+  --enable-demuxer=webm,matroska \
+  # WebP support
+  --enable-libwebp \
+  --enable-encoder=libwebp \
+  --enable-muxer=webp,image2 \
+  # reading/writing files
+  --enable-protocol=file \
+  # compilation runtime options
+  --enable-lto=auto \
+  --enable-small \
+  --strip strip \
+  && make -j$(nproc) \
+  && make install
+RUN \
+  echo "**** file cleanup ****" && \
+  rm -r \
+    /usr/local/lib/pkgconfig \
+    /usr/local/share \
+    /usr/local/include
+
+FROM alpine:edge AS final
+COPY --from=ffmpeg /usr/local /usr/local
+RUN apk add --no-cache bash libwebp-tools libvpx inotify-tools sqlite
 COPY --chmod=555 watch.sh db.sh /
 ENV DB_FILE=/db/webp-watcher.sqlite3
 ENTRYPOINT ["/watch.sh", "/input", "/output"]
