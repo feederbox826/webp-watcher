@@ -40,9 +40,10 @@ RUN ./configure \
   # compilation runtime options
   --enable-lto=auto \
   --enable-small \
-  --strip strip \
   && make -j$(nproc) \
   && make install
+RUN strip /usr/local/bin/ffmpeg
+RUN strip --strip-unneeded /usr/local/lib/*.so*
 RUN \
   echo "**** file cleanup ****" && \
   rm -r \
