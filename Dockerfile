@@ -29,7 +29,7 @@ RUN ./configure \
   --enable-shared \
   # WebM support (video + audio)
   --enable-libvpx \
-  --enable-decoder=vp9,opus \
+  --enable-decoder=vp8,vp9,opus \
   --enable-demuxer=webm,matroska \
   # WebP support
   --enable-libwebp \
