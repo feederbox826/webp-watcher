@@ -87,7 +87,7 @@ convert() {
     *.webm)
       # thumbnail at 1s
       printf "\r${MAGENTA}[ ] %s${NC}" "$rel_path"
-      if ffmpeg -ss "$SCREENSHOT_TIME" -i "$input_file" -vframes 1 "$target" -y -loglevel quiet; then
+      if ffmpeg -ss "$SCREENSHOT_TIME" -i "$input_file" -vframes 1 "$target" -y -loglevel errorv; then
         insert_file "$input_file" "$target"
       fi
       printf "\r${MAGENTA}[v] %s\033[K${NC}\n" "$rel_path"
