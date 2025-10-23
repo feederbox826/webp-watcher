@@ -52,6 +52,5 @@ COPY --from=ffmpeg /usr/local /usr/local
 RUN apk add --no-cache bash libwebp-tools libvpx inotify-tools sqlite
 COPY --chmod=555 watch.sh db.sh /
 ENV DB_FILE=/db/webp-watcher.sqlite3
-ENTRYPOINT ["/bin/bash"]
-CMD ["/watch.sh", "/input", "/output"]
+ENTRYPOINT ["/watch.sh", "/input", "/output"]
 VOLUME ["/input", "/output", "/db"]
