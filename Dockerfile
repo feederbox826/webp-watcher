@@ -1,17 +1,16 @@
 FROM alpine:edge AS ffmpeg
 
-# FFmpeg build deps
-RUN apk add --no-cache \
-    build-base \
-    nasm \
-    yasm \
-    pkgconfig \
-    libwebp-dev \
-    libvpx-dev \
-    libopusenc-dev
-
 ADD https://github.com/FFmpeg/FFmpeg.git /usr/src/ffmpeg
 WORKDIR /usr/src/ffmpeg
+# FFmpeg build deps
+RUN apk add --no-cache \
+  build-base \
+  nasm \
+  yasm \
+  pkgconfig \
+  libwebp-dev \
+  libvpx-dev \
+  libopusenc-dev
 # set CFLAGS (march via runner)
 ARG CFLAGS="-O2 -march=native -mtune=native"
 RUN ./configure \
@@ -49,8 +48,8 @@ RUN \
 
 FROM alpine:edge AS final
 COPY --from=ffmpeg /usr/local /usr/local
-RUN apk add --no-cache bash libwebp-tools libvpx inotify-tools sqlite
 COPY --chmod=555 watch.sh db.sh /
+RUN apk add --no-cache bash libwebp-tools libvpx inotify-tools sqlite
 ENV DB_FILE=/db/webp-watcher.sqlite3
 ENTRYPOINT ["/watch.sh", "/input", "/output"]
 VOLUME ["/input", "/output", "/db"]
