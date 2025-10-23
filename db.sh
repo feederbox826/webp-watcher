@@ -18,7 +18,7 @@ init_db() {
       CREATE INDEX IF NOT EXISTS idx_files_mtime on files (filename, mtime);
 EOF
   fi
-  sqlite3 "$DB_FILE" "PRAGMA journal_mode=WAL;"
+  sqlite3 "$DB_FILE" "PRAGMA journal_mode=WAL; PRAGMA optimize; VACUUM;"
 }
 
 lookup_file() {

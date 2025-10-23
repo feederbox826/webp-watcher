@@ -8,14 +8,10 @@ RUN apk add --no-cache \
     pkgconfig \
     libwebp-dev \
     libvpx-dev \
-    libopusenc-dev \
-    tar
+    libopusenc-dev
 
-# Download FFmpeg source (pick stable release)
-ARG FFMPEG_VERSION=8.0
-ADD https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.gz /ffmpeg-${FFMPEG_VERSION}.tar.gz
-RUN tar xvfz /ffmpeg-${FFMPEG_VERSION}.tar.gz
-WORKDIR /ffmpeg-${FFMPEG_VERSION}
+ADD https://github.com/FFmpeg/FFmpeg.git /usr/src/ffmpeg
+WORKDIR /usr/src/ffmpeg
 # set CFLAGS (march via runner)
 ARG CFLAGS="-O2 -march=native -mtune=native"
 RUN ./configure \
@@ -56,5 +52,6 @@ COPY --from=ffmpeg /usr/local /usr/local
 RUN apk add --no-cache bash libwebp-tools libvpx inotify-tools sqlite
 COPY --chmod=555 watch.sh db.sh /
 ENV DB_FILE=/db/webp-watcher.sqlite3
-ENTRYPOINT ["/watch.sh", "/input", "/output"]
+ENTRYPOINT ["/bin/bash"]
+CMD ["/watch.sh", "/input", "/output"]
 VOLUME ["/input", "/output", "/db"]
